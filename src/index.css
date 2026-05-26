@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+@theme {
+  /* Un marrón café profundo y elegante */
+  --color-marron-cafe: #4b3621; 
+}
+
