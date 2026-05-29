@@ -75,7 +75,7 @@ const CartView = () => {
           <div className="flex justify-center pt-4">
             <button 
               onClick={clear}
-              className="inline-flex items-center gap-2 border border-stone-200 bg-stone-100/60 hover:bg-stone-200/80 text-stone-600 hover:text-stone-900 font-medium py-2 px-5 rounded-xl text-xs tracking-wider uppercase transition-all shadow-sm active:scale-[0.98] duration-150 cursor-pointer"
+              className="inline-flex items-center gap-2 border border-stone-200 bg-stone-100/60 hover:bg-stone-200/80 text-stone-600 hover:text-stone-900 font-medium py-1 px-2 rounded-xl text-xs tracking-wider uppercase transition-all shadow-sm active:scale-[0.98] duration-150 cursor-pointer"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
