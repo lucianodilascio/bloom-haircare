@@ -1,7 +1,8 @@
 // src/features/products/components/ItemListContainer.jsx
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom'; // 👈 1. IMPORTAMOS EL HOOK
-import { getProducts } from '../../../services/productsMock';
+// 🌟 CAMBIO: Importamos las funciones reales de nuestro servicio de Firebase
+import { getProducts, getProductsByCategory } from '../../../services/productService';
 import ProductCard from './ProductCard';
 
 const ItemListContainer = ({ greeting }) => {
@@ -21,18 +22,19 @@ const ItemListContainer = ({ greeting }) => {
   useEffect(() => {
     setLoading(true); // Activamos el spinner cada vez que el usuario cambia de categoría
     
-    getProducts()
+    // 🌟 LÓGICA DE FIREBASE: 
+    // Evaluamos qué función ejecutar. Si hay categoryId, llamamos a la consulta con filtro de Firestore.
+    // Si no (Home), traemos toda la colección completa.
+    const asyncRequest = categoryId 
+      ? getProductsByCategory(categoryId) 
+      : getProducts();
+
+    asyncRequest
       .then((data) => {
-        // 👈 4. LÓGICA DE FILTRADO: 
-        // Si existe categoryId en la URL, filtramos el array del mock. Si no (Home), mostramos todos.
-        if (categoryId) {
-          const filteredProducts = data.filter(prod => prod.category === categoryId);
-          setProducts(filteredProducts);
-        } else {
-          setProducts(data);
-        }
+        // Al setear los productos, la data ya viene mapeada con sus IDs reales de Google
+        setProducts(data);
       })
-      .catch((error) => console.error("Error:", error))
+      .catch((error) => console.error("Error al traer el catálogo de Firestore:", error))
       .finally(() => setLoading(false));
 
   }, [categoryId]); // 👈 5. ¡SUPER IMPORTANTE! Agregamos categoryId acá para que el useEffect se vuelva a ejecutar cada vez que el usuario hace clic en el Navbar
@@ -55,7 +57,7 @@ const ItemListContainer = ({ greeting }) => {
   return (
     <main className="max-w-7xl mx-auto px-4 py-12 text-center">
       {/* El título ahora es dinámico */}
-      <h2 className="text-4xl font-bold text-stone-800 tracking-tight">
+      <h2 className="text-4xl font-bold text-stone-1000 tracking-tight">
         {displayTitle}
       </h2>
       

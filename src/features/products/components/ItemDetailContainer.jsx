@@ -1,7 +1,8 @@
 // src/features/products/components/ItemDetailContainer.jsx
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom'; // 👈 Importamos useParams y Link
-import { getProductById } from '../../../services/productsMock';
+// 🌟 CAMBIO: Importamos la función real de nuestro servicio de Firebase
+import { getProductById } from '../../../services/productService';
 import ItemDetail from './ItemDetail';
 
 const ItemDetailContainer = () => {
@@ -11,9 +12,10 @@ const ItemDetailContainer = () => {
 
   useEffect(() => {
     setLoading(true);
+    // Ahora esta función viaja a Firestore a buscar el documento único por su ID de Google
     getProductById(itemId)
       .then((data) => setProduct(data))
-      .catch((error) => console.error("Error:", error))
+      .catch((error) => console.error("Error al traer el detalle de Firestore:", error))
       .finally(() => setLoading(false));
   }, [itemId]);
 

@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom';
 const ProductCard = ({ product }) => {
   return (
     <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group p-4 text-center">
-      
+
       {/* CONTENEDOR DE IMAGEN */}
       <div className="bg-stone-50 h-72 w-full flex items-center justify-center relative overflow-hidden rounded-xl mb-4 border border-stone-100">
-        <img 
-          src={product.image} 
-          alt={product.name} 
+        <img
+          src={product.images?.[0] || product.image}
+          alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
         <span className="absolute top-3 right-3 text-[10px] font-bold tracking-wider text-stone-600 uppercase bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md shadow-sm border border-stone-100">
@@ -19,10 +19,10 @@ const ProductCard = ({ product }) => {
       {/* INFORMACIÓN DEL PRODUCTO */}
       <div className="flex-grow flex flex-col justify-between">
         <div>
-          <h3 className="text-base font-semibold text-stone-800 tracking-tight leading-snug min-h-[44px] flex items-center justify-center px-1">
+          <h3 className="text-xl font-bold text-stone-800 tracking-tight leading-snug min-h-[52px] flex items-center justify-center px-1">
             {product.name}
           </h3>
-          
+
           <div className="mt-3 space-y-0.5">
             <span className="block text-lg font-medium text-stone-600">
               ${product.price.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
@@ -41,7 +41,7 @@ const ProductCard = ({ product }) => {
         </div>
 
         {/* 2. CAMBIO CLAVE: Transformamos el <button> en un <Link> que apunta al id de este producto */}
-        <Link 
+        <Link
           to={`/item/${product.id}`}
           className="mt-4 w-full bg-stone-900 hover:bg-stone-800 text-white font-medium py-2.5 rounded-xl text-sm transition-all shadow-sm active:scale-[0.98] duration-150 flex items-center justify-center"
         >

@@ -36,16 +36,20 @@ const CartView = () => {
         {/* Columna Izquierda (Ocupa 2 espacios): Lista de Productos */}
         <div className="lg:grid lg:col-span-2 space-y-4">
           {cart.map((product) => (
-            <div key={product.id} className="bg-white rounded-2xl border border-stone-200 p-4 flex gap-4 items-center relative group">
+            // 🧴 MODIFICACIÓN 1: Cambiamos la key para que combine ID + Tamaño y sea 100% única
+            <div key={`${product.id}-${product.selectedSize}`} className="bg-white rounded-2xl border border-stone-200 p-4 flex gap-4 items-center relative group">
               {/* Miniatura de Imagen */}
               <div className="w-20 h-20 bg-stone-50 rounded-xl overflow-hidden flex-shrink-0 border border-stone-100">
-                <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                <img src={product.images?.[0] || product.image} alt={product.name} className="w-full h-full object-cover" />
               </div>
 
               {/* Textos del Producto */}
               <div className="flex-grow text-left pr-8">
                 <span className="text-[10px] font-bold tracking-wider text-stone-400 uppercase">{product.line}</span>
-                <h3 className="text-sm font-bold text-stone-800 leading-snug mt-0.5">{product.name}</h3>
+                {/* 🧴 MODIFICACIÓN 2: Le sumamos dinámicamente el tamaño al título para que sepa qué variante es */}
+                <h3 className="text-sm font-bold text-stone-800 leading-snug mt-0.5">
+                  {product.name} <span className="text-xs font-normal text-stone-500">({product.selectedSize}ml)</span>
+                </h3>
                 <p className="text-xs text-stone-500 mt-1">
                   {product.quantity} u.  ×  ${product.price.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                 </p>
@@ -60,7 +64,8 @@ const CartView = () => {
 
               {/* Botón eliminar individual (Tachito/X) */}
               <button 
-                onClick={() => removeItem(product.id)}
+                // 🧴 MODIFICACIÓN 3: Ahora le pasamos ID y Tamaño a la función removeItem global
+                onClick={() => removeItem(product.id, product.selectedSize)}
                 className="absolute top-4 right-4 p-1 text-stone-400 hover:text-red-600 rounded-lg transition-colors cursor-pointer"
                 title="Eliminar producto"
               >
