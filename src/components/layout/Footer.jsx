@@ -1,5 +1,4 @@
 // src/components/layout/Footer.jsx
-
 const Footer = () => {
   return (
     <footer className="bg-stone-300 border-t border-stone-200 py-8 mt-auto shadow-[0_-1px_3px_0_rgba(0,0,0,0.05)]">
@@ -23,7 +22,7 @@ const Footer = () => {
               href="https://www.instagram.com/bloomcosmetics.ar/" 
               target="_blank" 
               rel="noreferrer" 
-              className="w-12 h-12 flex items-center justify-center text-[#dd2a7b] hover:bg-stone-200 rounded-full transition-all duration-500 active:scale-95"
+              className="w-12 h-12 flex items-center justify-center text-[#dd2a7b] hover:bg-stone-50 rounded-full transition-all duration-500 active:scale-95"
               title="Seguinos en Instagram"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" className="bi bi-instagram" viewBox="0 0 16 16">
@@ -36,7 +35,7 @@ const Footer = () => {
               href="https://wa.me" 
               target="_blank" 
               rel="noreferrer" 
-              className="w-12 h-12 flex items-center justify-center text-[#25d366] hover:bg-stone-200 rounded-full transition-all duration-500 active:scale-95"
+              className="w-12 h-12 flex items-center justify-center text-[#25d366] hover:bg-stone-50 rounded-full transition-all duration-500 active:scale-95"
               title="Contactanos por WhatsApp"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" className="bi bi-whatsapp" viewBox="0 0 16 16">
@@ -46,7 +45,7 @@ const Footer = () => {
           </div>
 
           {/* SECCIÓN DERECHA: Derechos Reservados */}
-          <div className="text-xs text-stone-600 text-center md:text-right font-medium">
+          <div className="text-xs text-stone-600 text-center md:text-right font-medium ">
             <p>&copy; {new Date().getFullYear()} Bloom Haircare. Todos los derechos reservados.</p>
             <p className="mt-0.5 text-[10px] tracking-widest uppercase text-stone-500">
               Desarrollado y diseñado por Luciano Dilascio

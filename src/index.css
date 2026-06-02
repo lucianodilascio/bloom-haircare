@@ -3,5 +3,6 @@
 @theme {
   /* Un marrón café profundo y elegante */
   --color-marron-cafe: #4b3621; 
+  --font-sans: "Plus Jakarta Sans", sans-serif;
 }
 

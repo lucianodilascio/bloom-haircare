@@ -5,6 +5,8 @@ import Footer from './components/layout/Footer';
 import ItemListContainer from './features/products/components/ItemListContainer';
 import ItemDetailContainer from './features/products/components/ItemDetailContainer';
 import CartView from './features/cart/components/CartView';
+import WhatsAppButton from './components/common/WhatsAppButton';
+
 
 const App = () => {
   return (
@@ -30,10 +32,13 @@ const App = () => {
               />
               <Route path="/cart" element={<CartView />} />
 
+              
+
             </Routes>
           </div>
 
           <Footer />
+          <WhatsAppButton/>
         </div>
       </BrowserRouter>
     </CartProvider>

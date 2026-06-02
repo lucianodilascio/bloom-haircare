@@ -32,8 +32,8 @@ export const CartProvider = ({ children }) => {
   };
 
   // Función para eliminar un solo producto del carrito (el botón de la cruz/tacho)
-  const removeItem = (id) => {
-    setCart(cart.filter((prod) => prod.id !== id));
+  const removeItem = (id, size) => {
+    setCart(cart.filter((prod) => !(prod.id === id && prod.selectedSize === size)));
   };
 
   // Función para vaciar todo el carrito de un solo clic

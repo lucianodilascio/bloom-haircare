@@ -57,7 +57,7 @@ const ItemListContainer = ({ greeting }) => {
   return (
     <main className="max-w-7xl mx-auto px-4 py-12 text-center">
       {/* El título ahora es dinámico */}
-      <h2 className="text-4xl font-bold text-stone-1000 tracking-tight">
+      <h2 className="text-4xl font-bold text-stone-900 tracking-tight">
         {displayTitle}
       </h2>
       

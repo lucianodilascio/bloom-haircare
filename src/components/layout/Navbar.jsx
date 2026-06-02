@@ -9,7 +9,8 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm">
+    // Se añade 'relative' para asegurar el correcto posicionamiento del menú absolute
+    <nav className="bg-stone-300 border-b border-stone-200 sticky top-0  z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center h-24">
 
@@ -35,7 +36,6 @@ const Navbar = () => {
 
           {/* SECCIÓN DERECHA: Carrito y Botón de Menú Hamburguesa */}
           <div className="flex-1 flex justify-end items-center gap-4">
-
 
             {/* BOTÓN HAMBURGUESA RESTAURADO: Solo se ve en dispositivos móviles (md:hidden) */}
             <button
@@ -65,17 +65,19 @@ const Navbar = () => {
       </div>
 
       {/* MENÚ MÓVIL DESPLEGABLE: Efecto Frosted Glass Premium */}
-      {isOpen && (
-        <div
-          className="md:hidden absolute top-full left-0 w-full bg-white/10 backdrop-blur-md border-b border-stone-200/80 px-4 pt-2 pb-6 space-y-2 shadow-lg transition-all duration-300"
-          id="mobile-menu"
-        >
-          <Link to="/" onClick={() => setIsOpen(false)} className="block text-stone-600 hover:text-stone-900 font-medium py-2.5 px-3 rounded-xl hover:bg-stone-50/50 transition-colors text-sm text-center">Inicio</Link>
-          <Link to="/category/shampoos-enjuagues" onClick={() => setIsOpen(false)} className="block text-stone-600 hover:text-stone-900 font-medium py-2.5 px-3 rounded-xl hover:bg-stone-50/50 transition-colors text-sm text-center">Shampoos y Enjuagues</Link>
-          <Link to="/category/mascaras-tratamientos" onClick={() => setIsOpen(false)} className="block text-stone-600 hover:text-stone-900 font-medium py-2.5 px-3 rounded-xl hover:bg-stone-50/50 transition-colors text-sm text-center">Máscaras y Tratamientos</Link>
-          <Link to="/category/serums-ampollas" onClick={() => setIsOpen(false)} className="block text-stone-600 hover:text-stone-900 font-medium py-2.5 px-3 rounded-xl hover:bg-stone-50/50 transition-colors text-sm text-center">Sérums y Ampollas</Link>
-        </div>
-      )}
+      <div
+        className={`md:hidden absolute top-full left-0 w-full bg-white/10 backdrop-blur-md border-b border-stone-200/80 px-4 pt-2 pb-6 space-y-2 shadow-lg transition-all duration-300 ${
+          isOpen 
+            ? "opacity-100 pointer-events-auto translate-y-0" 
+            : "opacity-0 pointer-events-none -translate-y-2"
+        }`}
+        id="mobile-menu"
+      >
+        <Link to="/" onClick={() => setIsOpen(false)} className="block text-stone-600 hover:text-stone-900 font-medium py-2.5 px-3 rounded-xl hover:bg-stone-50/50 transition-colors text-sm text-center">Inicio</Link>
+        <Link to="/category/shampoos-enjuagues" onClick={() => setIsOpen(false)} className="block text-stone-600 hover:text-stone-900 font-medium py-2.5 px-3 rounded-xl hover:bg-stone-50/50 transition-colors text-sm text-center">Shampoos y Enjuagues</Link>
+        <Link to="/category/mascaras-tratamientos" onClick={() => setIsOpen(false)} className="block text-stone-600 hover:text-stone-900 font-medium py-2.5 px-3 rounded-xl hover:bg-stone-50/50 transition-colors text-sm text-center">Máscaras y Tratamientos</Link>
+        <Link to="/category/serums-ampollas" onClick={() => setIsOpen(false)} className="block text-stone-600 hover:text-stone-900 font-medium py-2.5 px-3 rounded-xl hover:bg-stone-50/50 transition-colors text-sm text-center">Sérums y Ampollas</Link>
+      </div>
     </nav>
   );
 };
