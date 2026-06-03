@@ -1,4 +1,4 @@
-
+// src/features/products/components/ItemDetail.jsx
 import { useState, useContext } from 'react';
 import { CartContext } from '../../../context/CartContext';
 import Swal from 'sweetalert2';
@@ -42,10 +42,46 @@ const ItemDetail = ({ product }) => {
     }
   };
 
+  // 🛒 Lógica de agregado con validación de stock inyectada
   const handleAddToCart = () => {
-    // 👈 CONECTAMOS EL TAMAÑO: Enviamos al carrito el producto clonado agregándole el size elegido
-    addItem({ ...product, selectedSize }, quantity);
+    // Capturamos el código de respuesta que viene de la validación del CartContext
+    const result = addItem({ ...product, selectedSize }, quantity);
 
+    // 🔴 ALERTA 1: Ya se alcanzó el límite de stock en el carrito
+    if (result === 'LIMIT_REACHED') {
+      Swal.fire({
+        title: 'Stock máximo alcanzado',
+        html: `Ya tenés las <strong>${product.stock} u.</strong> disponibles de este producto en tu bolsa de compras.`,
+        icon: 'info',
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: '#1c1917',
+        background: '#fafaf9',
+        customClass: {
+          popup: 'rounded-3xl border border-stone-200 font-sans text-stone-800',
+          title: 'text-2xl font-bold tracking-tight text-stone-800',
+        }
+      });
+      return;
+    }
+
+    // 🟡 ALERTA 2: Se sumaron unidades pero se clavó en el tope máximo de stock
+    if (result === 'CAPPED') {
+      Swal.fire({
+        title: 'Cantidad ajustada',
+        html: `Sumamos el producto a tu bolsa, pero limitamos el total a <strong>${product.stock} u.</strong> por falta de stock disponible.`,
+        icon: 'warning',
+        confirmButtonText: 'Revisar bolsa',
+        confirmButtonColor: '#1c1917',
+        background: '#fafaf9',
+        customClass: {
+          popup: 'rounded-3xl border border-stone-200 font-sans text-stone-800',
+          title: 'text-2xl font-bold tracking-tight text-stone-800',
+        }
+      });
+      return;
+    }
+
+    // 🟢 ALERTA 3: Éxito (Se pudo agregar la cantidad solicitada normalmente)
     Swal.fire({
       title: '¡Agregado al carrito!',
       html: `Sumaste <strong>${quantity} u.</strong> de <strong>${product.name} (${selectedSize}ml)</strong> a tu bolsa.`,
@@ -76,79 +112,79 @@ const ItemDetail = ({ product }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
 
         {/* 📸 COLUMNA IZQUIERDA: Módulo de Carrusel Premium con Efecto Slide */}
-<div className="w-full flex flex-col gap-3">
-  {/* Contenedor padre con overflow-hidden para tapar las fotos que quedan "afuera" */}
-  <div className="bg-stone-50 rounded-2xl overflow-hidden aspect-square relative border border-stone-100 group w-full">
-    
-    {imagesList.length > 0 ? (
-      /* 🌟 ESTA ES LA MAGIA: Una pista flex que contiene todas las fotos alineadas de corrido */
-      <div 
-        className="flex w-full h-full transition-transform duration-500 ease-out"
-        style={{ transform: `translateX(-${currentImgIndex * 100}%)` }}
-      >
-        {imagesList.map((img, index) => (
-          <img
-            key={index}
-            src={img}
-            alt={`${product.name} - Vista ${index + 1}`}
-            /* flex-shrink-0 es clave para que cada foto ocupe el 100% exacto de la caja sin aplastarse */
-            className="w-full h-full object-cover flex-shrink-0"
-          />
-        ))}
-      </div>
-    ) : (
-      <div className="absolute inset-0 flex items-center justify-center text-stone-300 text-sm">
-        Sin imagen disponible
-      </div>
-    )}
+        <div className="w-full flex flex-col gap-3">
+          {/* Contenedor padre con overflow-hidden para tapar las fotos que quedan "afuera" */}
+          <div className="bg-stone-50 rounded-2xl overflow-hidden aspect-square relative border border-stone-100 group w-full">
+            
+            {imagesList.length > 0 ? (
+              /* 🌟 ESTA ES LA MAGIA: Una pista flex que contiene todas las fotos alineadas de corrido */
+              <div 
+                className="flex w-full h-full transition-transform duration-500 ease-out"
+                style={{ transform: `translateX(-${currentImgIndex * 100}%)` }}
+              >
+                {imagesList.map((img, index) => (
+                  <img
+                    key={index}
+                    src={img}
+                    alt={`${product.name} - Vista ${index + 1}`}
+                    /* flex-shrink-0 es clave para que cada foto ocupe el 100% exacto de la caja sin aplastarse */
+                    className="w-full h-full object-cover flex-shrink-0"
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-stone-300 text-sm">
+                Sin imagen disponible
+              </div>
+            )}
 
-    {/* Etiqueta de la línea */}
-    <span className="absolute top-4 left-4 z-10 text-[10px] font-bold tracking-wider text-stone-700 uppercase bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full border border-stone-100 shadow-sm">
-      {product.line}
-    </span>
+            {/* Etiqueta de la línea */}
+            <span className="absolute top-4 left-4 z-10 text-[10px] font-bold tracking-wider text-stone-700 uppercase bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full border border-stone-100 shadow-sm">
+              {product.line}
+            </span>
 
-    {/* Flechas de navegación con z-10 para quedar siempre al frente */}
-    {imagesList.length > 1 && (
-      <>
-        <button
-          onClick={prevImage}
-          className="absolute left-3 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white text-stone-800 p-2 rounded-full shadow-sm border border-stone-100 backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
-          title="Anterior"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <button
-          onClick={nextImage}
-          className="absolute right-3 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white text-stone-800 p-2 rounded-full shadow-sm border border-stone-100 backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
-          title="Siguiente"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </>
-    )}
-  </div>
+            {/* Flechas de navegación con z-10 para quedar siempre al frente */}
+            {imagesList.length > 1 && (
+              <>
+                <button
+                  onClick={prevImage}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white text-stone-800 p-2 rounded-full shadow-sm border border-stone-100 backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
+                  title="Anterior"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white text-stone-800 p-2 rounded-full shadow-sm border border-stone-100 backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
+                  title="Siguiente"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </>
+            )}
+          </div>
 
-  {/* Miniaturas inferiores (Thumbnails) */}
-  {imagesList.length > 1 && (
-    <div className="flex gap-2 overflow-x-auto pb-1 justify-start">
-      {imagesList.map((img, index) => (
-        <button
-          key={index}
-          onClick={() => setCurrentImgIndex(index)}
-          className={`w-16 h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 transition-all bg-stone-50 cursor-pointer ${
-            index === currentImgIndex ? 'border-stone-800 scale-[0.98]' : 'border-stone-200 hover:border-stone-400'
-          }`}
-        >
-          <img src={img} alt="Miniatura" className="w-full h-full object-cover" />
-        </button>
-      ))}
-    </div>
-  )}
-</div>
+          {/* Miniaturas inferiores (Thumbnails) */}
+          {imagesList.length > 1 && (
+            <div className="flex gap-2 overflow-x-auto pb-1 justify-start">
+              {imagesList.map((img, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentImgIndex(index)}
+                  className={`w-16 h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 transition-all bg-stone-50 cursor-pointer ${
+                    index === currentImgIndex ? 'border-stone-800 scale-[0.98]' : 'border-stone-200 hover:border-stone-400'
+                  }`}
+                >
+                  <img src={img} alt="Miniatura" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* COLUMNA DERECHA: Detalles de Compra Rápidos */}
         <div className="flex flex-col gap-5 text-left h-full justify-between w-full">

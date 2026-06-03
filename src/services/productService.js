@@ -1,4 +1,4 @@
-import { collection, getDocs, getDoc, doc, query, where } from "firebase/firestore";
+import { collection, getDocs, getDoc, doc, query, where, addDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
 
 /**
@@ -66,6 +66,23 @@ export const getProductsByCategory = async (categoryName) => {
     return products;
   } catch (error) {
     console.error("Error al filtrar productos por categoría:", error);
+    throw error;
+  }
+};
+
+/**
+ * ➕ 4. Guardar/crear un nuevo producto en Firestore desde el PANEL ADMIN 
+ * (ESTO EVITA QUE EL CLIENTE DEPENDA DEL PROGRAMADOR PARA CARGAR SUS PRODUCTOS)
+ */
+
+export const addProduct = async (newProduct) => {
+  try {
+    const productsRef = collection(db, "products");
+    // addDoc crea el documento y le clava el ID automático de Google
+    const docRef = await addDoc(productsRef, newProduct);
+    return docRef.id;
+  } catch (error) {
+    console.error("Error al guardar el producto en Firestore:", error);
     throw error;
   }
 };

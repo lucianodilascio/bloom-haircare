@@ -10,26 +10,51 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
 
   // Función para saber si un producto ya está en el carrito (evita duplicados)
-  const isInCart = (id) => {
-    return cart.some((prod) => prod.id === id);
+  const isInCart = (id, size) => {
+    return cart.some((prod) => prod.id === id && prod.selectedSize === size);
   };
 
   // Función principal: Agregar al carrito
   const addItem = (item, quantity) => {
-    if (isInCart(item.id)) {
-      // Si ya existe, recorremos el carrito y sumamos la nueva cantidad a la vieja
+  const productInCart = cart.find(
+    (prod) => prod.id === item.id && prod.selectedSize === item.selectedSize
+  );
+
+  if (productInCart) {
+    const totalProposedQuantity = productInCart.quantity + quantity;
+
+    // CASO A: El usuario ya alcanzó el stock máximo permitido en su carrito
+    if (productInCart.quantity >= item.stock) {
+      return 'LIMIT_REACHED';
+    }
+
+    // CASO B: La nueva suma supera el stock, entonces lo "clavamós" en el tope máximo
+    if (totalProposedQuantity > item.stock) {
       setCart(
-        cart.map((prod) => 
-          prod.id === item.id 
-            ? { ...prod, quantity: prod.quantity + quantity } 
+        cart.map((prod) =>
+          prod.id === item.id && prod.selectedSize === item.selectedSize
+            ? { ...prod, quantity: item.stock }
             : prod
         )
       );
-    } else {
-      // Si no existe, lo agregamos al array manteniendo lo que ya había
-      setCart([...cart, { ...item, quantity }]);
+      return 'CAPPED';
     }
-  };
+
+    // CASO C: Hay stock de sobra, sumamos normalmente
+    setCart(
+      cart.map((prod) =>
+        prod.id === item.id && prod.selectedSize === item.selectedSize
+          ? { ...prod, quantity: totalProposedQuantity }
+          : prod
+      )
+    );
+    return 'SUCCESS';
+  } else {
+    // CASO D: El producto no estaba en el carrito, entra de cero
+    setCart([...cart, { ...item, quantity }]);
+    return 'SUCCESS';
+  }
+};
 
   // Función para eliminar un solo producto del carrito (el botón de la cruz/tacho)
   const removeItem = (id, size) => {

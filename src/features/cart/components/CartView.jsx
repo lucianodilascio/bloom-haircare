@@ -113,7 +113,7 @@ const CartView = () => {
                 <span className="text-2xl font-black text-stone-900 block">
                   ${totalPrice().toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                 </span>
-                <span className="text-[10px] font-bold text-stone-400 block tracking-widest uppercase mt-0.5">O 3 cuotas sin interés de ${(totalPrice() / 3).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
+                <span className="text-[10px] font-bold text-stone-400 block tracking-widest uppercase mt-0.5">O 3 cuotas sin interés de ${(totalPrice() / 3).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             </div>
           </div>
