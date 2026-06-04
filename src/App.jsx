@@ -7,6 +7,7 @@ import ItemDetailContainer from './features/products/components/ItemDetailContai
 import CartView from './features/cart/components/CartView';
 import WhatsAppButton from './components/common/WhatsAppButton';
 import AdminDashboard from './features/admin/components/AdminDashboard';
+import { CheckoutView } from "./features/checkout/CheckoutView";
 
 
 const App = () => {
@@ -34,6 +35,8 @@ const App = () => {
               <Route path="/cart" element={<CartView />} />
 
               <Route path="/admin" element={<AdminDashboard />} />
+
+              <Route path="/checkout" element={<CheckoutView />} />
 
             </Routes>
           </div>

@@ -1,11 +1,24 @@
 // src/features/cart/components/CartView.jsx
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { CartContext } from '../../../context/CartContext';
-import { Link } from 'react-router-dom';
 
 const CartView = () => {
   // Traemos todo el arsenal del estado global
   const { cart, removeItem, clear, totalPrice, totalQuantity } = useContext(CartContext);
+
+  // 🚀 Lógica para controlar la transición fluida con Spinner al Checkout
+  const navigate = useNavigate();
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  const handleCheckoutClick = () => {
+    setIsNavigating(true); // Encendemos la animación del spinner
+
+    // Simulamos una pequeña transición de 800ms antes de saltar de pantalla
+    setTimeout(() => {
+      navigate('/checkout');
+    }, 800);
+  };
 
   // PANTALLA 1: Si el carrito está completamente vacío
   if (cart.length === 0) {
@@ -63,7 +76,7 @@ const CartView = () => {
               </div>
 
               {/* Botón eliminar individual (Tachito/X) */}
-              <button 
+              <button
                 // 🧴 MODIFICACIÓN 3: Ahora le pasamos ID y Tamaño a la función removeItem global
                 onClick={() => removeItem(product.id, product.selectedSize)}
                 className="absolute top-4 right-4 p-1 text-stone-400 hover:text-red-600 rounded-lg transition-colors cursor-pointer"
@@ -78,7 +91,7 @@ const CartView = () => {
 
           {/* Botón para vaciar todo */}
           <div className="flex justify-center pt-4">
-            <button 
+            <button
               onClick={clear}
               className="inline-flex items-center gap-2 border border-stone-200 bg-stone-100/60 hover:bg-stone-200/80 text-stone-600 hover:text-stone-900 font-medium py-1 px-2 rounded-xl text-xs tracking-wider uppercase transition-all shadow-sm active:scale-[0.98] duration-150 cursor-pointer"
             >
@@ -88,14 +101,14 @@ const CartView = () => {
               Vaciar carrito
             </button>
           </div>
-          
+
         </div>
 
         {/* Columna Derecha (Ocupa 1 espacio): Resumen de Facturación */}
         <div className="bg-white rounded-3xl border border-stone-200 p-6 shadow-sm h-fit text-left flex flex-col justify-between">
           <div>
             <h3 className="text-base font-bold text-stone-800 tracking-tight border-b border-stone-100 pb-3">Resumen de pedido</h3>
-            
+
             <div className="mt-4 space-y-2 border-b border-stone-100 pb-4">
               <div className="flex justify-between text-sm text-stone-500">
                 <span>Subtotal ({totalQuantity()} productos)</span>
@@ -118,8 +131,23 @@ const CartView = () => {
             </div>
           </div>
 
-          <button className="mt-6 w-full bg-stone-900 hover:bg-stone-800 text-white font-medium py-3 rounded-xl text-sm transition-all shadow-sm active:scale-[0.98] duration-150 flex items-center justify-center gap-2 cursor-pointer">
-            Finalizar Compra
+          {/* 🛠️ Botón interactivo conectado al handleCheckoutClick con Spinner integrado */}
+          <button
+            onClick={handleCheckoutClick}
+            disabled={isNavigating}
+            className="mt-6 w-full bg-stone-900 hover:bg-stone-800 text-white font-medium py-3 rounded-xl text-sm transition-all shadow-sm active:scale-[0.98] duration-150 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-80 disabled:cursor-not-allowed"
+          >
+            {isNavigating ? (
+              <>
+                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Procesando...</span>
+              </>
+            ) : (
+              "Finalizar Compra"
+            )}
           </button>
         </div>
       </div>
