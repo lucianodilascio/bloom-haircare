@@ -20,7 +20,7 @@ const AdminDashboard = () => {
   const [description, setDescription] = useState('');
   const [stock, setStock] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [sizesInput, setSizesInput] = useState('300, 500');
+  const [sizesInput, setSizesInput] = useState('');
 
   // 🔒 Manejador del acceso de seguridad
   const handleLogin = (e) => {
@@ -112,6 +112,7 @@ const AdminDashboard = () => {
       setDescription('');
       setStock('');
       setImageUrl('');
+      setSizesInput('');
 
     } catch (error) {
       Swal.fire('Error', 'No se pudo simular el guardado del producto.', 'error');
@@ -187,7 +188,6 @@ const AdminDashboard = () => {
           <label className="text-[10px] uppercase font-bold tracking-wider text-stone-400">Nombre del Producto *</label>
           <input
             type="text"
-            required
             placeholder="Ej: Shampoo CONTROL LISS (Nanoqueratinas)"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -270,7 +270,7 @@ const AdminDashboard = () => {
 
         {/* Tamaños / Variantes */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] uppercase font-bold tracking-wider text-stone-400">Tamaños (Números enteros separados por coma)</label>
+          <label className="text-[10px] uppercase font-bold tracking-wider text-stone-400">Tamaños</label>
           <input
             type="text"
             placeholder="Ej: 15, 300, 500, 1000"
