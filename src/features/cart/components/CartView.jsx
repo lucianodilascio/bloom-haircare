@@ -244,7 +244,7 @@ const CartView = () => {
                 <span>Procesando...</span>
               </>
             ) : (
-              "Finalizar Comra"
+              "Finalizar Compra"
             )}
           </button>
         </div>
