@@ -121,14 +121,19 @@ const AdminDashboard = () => {
 
   // 🛑 PANTALLA 1: Acceso de seguridad
   if (!isAuthorized) {
-    return (
-      <main className="max-w-md mx-auto px-4 py-20 min-h-[600px] flex flex-col justify-center">
-        <div className="bg-white rounded-3xl border border-stone-200 p-8 shadow-sm text-center">
-          <span className="text-3xl">🔒</span>
-          <h2 className="text-2xl font-black text-stone-800 tracking-tight mt-2">Panel de Administración</h2>
-          <p className="text-xs text-stone-500 mt-1 mb-6">Ingresá la clave de desarrollo para gestionar el stock.</p>
-          
-          <form onSubmit={handleLogin} className="flex flex-col gap-4">
+  return (
+    <main className="max-w-md mx-auto px-4 py-20 min-h-[600px] flex flex-col justify-center">
+      <div className="bg-white rounded-3xl border border-stone-200 p-8 shadow-sm text-center">
+        <span className="text-3xl">🔒</span>
+        <h2 className="text-2xl font-black text-stone-800 tracking-tight mt-2">Panel de Administración</h2>
+        
+        {/* ✨ MODIFICADO: Le dejamos la pista en bandeja de plata */}
+        <p className="text-xs text-stone-500 mt-1 mb-6">
+          Ingresá la clave de desarrollo para gestionar el stock. <br />
+          <span className="font-semibold text-stone-700 bg-stone-100 px-1.5 py-0.5 rounded inline-block mt-1">Clave: bloom2026</span>
+        </p>
+        
+        <form onSubmit={handleLogin} className="flex flex-col gap-4">
             <div className="relative w-full">
               <input
                 type={showPassword ? "text" : "password"}
@@ -174,8 +179,9 @@ const AdminDashboard = () => {
           onClick={() => {
             setIsAuthorized(false);
             setShowPassword(false);
+            setPassword('');
           }} 
-          className="text-xs border border-stone-200 bg-stone-50 hover:bg-stone-100 px-3 py-1.5 rounded-lg text-stone-600 font-medium transition-colors"
+          className="text-s border border-stone-500 bg-stone-50 hover:bg-black px-3 py-1.5 rounded-lg text-stone-700 hover:text-white font-medium transition-colors"
         >
           Cerrar Sesión
         </button>
