@@ -2,6 +2,7 @@
 import { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CartContext } from '../../../context/CartContext';
+import Swal from 'sweetalert2';
 
 const CartView = () => {
   // Traemos todo el arsenal del estado global
@@ -49,6 +50,23 @@ const CartView = () => {
   const total = subtotal + finalShipping;
 
   const handleCheckoutClick = () => {
+    // 🔒 INTERCEPTOR: Si no tiene envío gratis y el costo de envío aún es null, frenamos el flujo
+    if (!isFreeShipping && shippingCost === null) {
+      Swal.fire({
+        title: 'Falta calcular el envío',
+        html: 'Por favor, ingresá tu <strong>Código Postal</strong> y dale a <strong>Calcular</strong> para poder consolidar el total de tu pedido.',
+        icon: 'info',
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: '#1c1917',
+        background: '#fafaf9',
+        customClass: {
+          popup: 'rounded-3xl border border-stone-200 font-sans text-stone-800',
+          title: 'text-xl font-bold tracking-tight text-stone-800',
+        }
+      });
+      return; // Frena la ejecución acá y no deja avanzar al checkout
+    }
+
     setIsNavigating(true); // Encendemos la animación del spinner
 
     // Simulamos una pequeña transición de 800ms antes de saltar de pantalla
@@ -84,7 +102,8 @@ const CartView = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Columna Izquierda (Ocupa 2 espacios): Lista de Productos */}
-        <div className="lg:grid lg:col-span-2 space-y-4">
+        {/* ✨ CAMBIO CLAVE: Cambiamos lg:grid por flex-col para evitar el estiramiento vertical de los hijos */}
+        <div className="lg:col-span-2 flex flex-col gap-4">
           {cart.map((product) => (
             <div key={`${product.id}-${product.selectedSize}`} className="bg-white rounded-2xl border border-stone-200 p-4 flex gap-4 items-center relative group">
               {/* Miniatura de Imagen */}
@@ -124,7 +143,7 @@ const CartView = () => {
           ))}
 
           {/* Botón para vaciar todo */}
-          <div className="flex justify-center pt-4">
+          <div className="flex justify-center items-center pt-2">
             <button
               onClick={clear}
               className="inline-flex items-center gap-2 border border-stone-200 bg-stone-100/60 hover:bg-stone-200/80 text-stone-600 hover:text-stone-900 font-medium py-1 px-2 rounded-xl text-xs tracking-wider uppercase transition-all shadow-sm active:scale-[0.98] duration-150 cursor-pointer"
@@ -142,7 +161,7 @@ const CartView = () => {
           <div>
             <h3 className="text-base font-bold text-stone-800 tracking-tight border-b border-stone-100 pb-3">Resumen de pedido</h3>
 
-            {/* 🚚 MODIFICACIÓN EXTRA: Formulario de Cotización de Envío */}
+            {/* 🚚 Formulario de Cotización de Envío */}
             <form onSubmit={handleCalculateShipping} className="mt-4 pb-4 border-b border-stone-100">
               <label className="text-[10px] uppercase font-bold tracking-wider text-stone-400 block mb-1.5">
                 Calcular costo de envío
@@ -158,7 +177,7 @@ const CartView = () => {
                 />
                 <button
                   type="submit"
-                  disabled={isCalculating || postalCode.length !== 4} // ✨ Deshabilitado si no tiene 4 caracteres
+                  disabled={isCalculating || postalCode.length !== 4} // Deshabilitado si no tiene 4 caracteres
                   className="bg-stone-900 hover:bg-stone-800 text-white text-xs font-medium px-4 h-10 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap"
                 >
                   {isCalculating ? 'Calculando...' : 'Calcular'}
@@ -186,7 +205,6 @@ const CartView = () => {
               </div>
               <div className="flex justify-between text-sm items-center text-stone-500">
                 <span>Envío</span>
-                {/* ✨ Cambiado: Muestra Gratis si pasa los $50k o si es de Olavarría (costo 0) */}
                 {isFreeShipping || shippingCost === 0 ? (
                   <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Gratis</span>
                 ) : shippingCost !== null ? (
@@ -226,7 +244,7 @@ const CartView = () => {
                 <span>Procesando...</span>
               </>
             ) : (
-              "Finalizar Compra"
+              "Finalizar Comra"
             )}
           </button>
         </div>

@@ -1,14 +1,24 @@
 // src/context/CartContext.jsx
-// 🌟 SUMAMOS: 'useContext' en los imports de React
-import { createContext, useState, useContext } from 'react';
+// 🌟 SUMAMOS: 'useEffect' en los imports de React para controlar la persistencia
+import { createContext, useState, useContext, useEffect } from 'react';
 
 // 1. Creamos el contexto que los componentes van a "buscar" para leer los datos
 export const CartContext = createContext();
 
 // 2. Creamos el Proveedor (Provider) que va a guardar el estado y las funciones
 export const CartProvider = ({ children }) => {
-  // El estado global: un array donde meteremos los productos con su cantidad
-  const [cart, setCart] = useState([]);
+  // 💾 LÓGICA DE PERSISTENCIA: Inicializamos el estado leyendo el localStorage.
+  // Usamos una función anónima para que React solo ejecute esta lectura costosa en el primer render.
+  const [cart, setCart] = useState(() => {
+    const savedCart = localStorage.getItem('bloom_cart');
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
+
+  // 🔥 EFFECT: Cada vez que el carrito sufra una modificación (agregar, quitar, vaciar),
+  // guardamos la versión actualizada en formato JSON dentro del disco del navegador.
+  useEffect(() => {
+    localStorage.setItem('bloom_cart', JSON.stringify(cart));
+  }, [cart]);
 
   // Función para saber si un producto ya está en el carrito (evita duplicados)
   const isInCart = (id, size) => {
