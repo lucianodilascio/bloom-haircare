@@ -11,6 +11,43 @@ const CartView = () => {
   const navigate = useNavigate();
   const [isNavigating, setIsNavigating] = useState(false);
 
+  // 🚚 ESTADOS NUEVOS: Lógica de simulación de envío
+  const [postalCode, setPostalCode] = useState('');
+  const [shippingCost, setShippingCost] = useState(null);
+  const [isCalculating, setIsCalculating] = useState(false);
+
+  // Lógica de cálculo comercial de Bloom
+  const subtotal = totalPrice();
+  const freeShippingThreshold = 50000;
+  const isFreeShipping = subtotal >= freeShippingThreshold;
+
+  // Función inteligente para simular la cotización con el correo
+  const handleCalculateShipping = (e) => {
+    e.preventDefault();
+    
+    // 🔍 Validamos que tenga exactamente 4 dígitos antes de correr la simulación
+    if (postalCode.length !== 4) return;
+
+    setIsCalculating(true);
+
+    // Simulamos una deley de API de correo (800ms)
+    setTimeout(() => {
+      // 🚚 NUEVA LÓGICA: 
+      if (postalCode === '7400') {
+        setShippingCost(0); // ✨ Olavarría: ¡Entrega local GRATIS!
+      } else if (postalCode.startsWith('7')) {
+        setShippingCost(3500); // Resto de Provincia de BSAS
+      } else {
+        setShippingCost(5800); // Resto del país
+      }
+      setIsCalculating(false);
+    }, 800);
+  };
+
+  // Montos finales consolidados
+  const finalShipping = isFreeShipping ? 0 : (shippingCost || 0);
+  const total = subtotal + finalShipping;
+
   const handleCheckoutClick = () => {
     setIsNavigating(true); // Encendemos la animación del spinner
 
@@ -49,7 +86,6 @@ const CartView = () => {
         {/* Columna Izquierda (Ocupa 2 espacios): Lista de Productos */}
         <div className="lg:grid lg:col-span-2 space-y-4">
           {cart.map((product) => (
-            // 🧴 MODIFICACIÓN 1: Cambiamos la key para que combine ID + Tamaño y sea 100% única
             <div key={`${product.id}-${product.selectedSize}`} className="bg-white rounded-2xl border border-stone-200 p-4 flex gap-4 items-center relative group">
               {/* Miniatura de Imagen */}
               <div className="w-20 h-20 bg-stone-50 rounded-xl overflow-hidden flex-shrink-0 border border-stone-100">
@@ -59,7 +95,6 @@ const CartView = () => {
               {/* Textos del Producto */}
               <div className="flex-grow text-left pr-8">
                 <span className="text-[10px] font-bold tracking-wider text-stone-400 uppercase">{product.line}</span>
-                {/* 🧴 MODIFICACIÓN 2: Le sumamos dinámicamente el tamaño al título para que sepa qué variante es */}
                 <h3 className="text-sm font-bold text-stone-800 leading-snug mt-0.5">
                   {product.name} <span className="text-xs font-normal text-stone-500">({product.selectedSize}ml)</span>
                 </h3>
@@ -77,7 +112,6 @@ const CartView = () => {
 
               {/* Botón eliminar individual (Tachito/X) */}
               <button
-                // 🧴 MODIFICACIÓN 3: Ahora le pasamos ID y Tamaño a la función removeItem global
                 onClick={() => removeItem(product.id, product.selectedSize)}
                 className="absolute top-4 right-4 p-1 text-stone-400 hover:text-red-600 rounded-lg transition-colors cursor-pointer"
                 title="Eliminar producto"
@@ -101,37 +135,83 @@ const CartView = () => {
               Vaciar carrito
             </button>
           </div>
-
         </div>
 
-        {/* Columna Derecha (Ocupa 1 espacio): Resumen de Facturación */}
+        {/* Columna Derecha (Ocupa 1 espacio): Resumen de Facturación Interactiva */}
         <div className="bg-white rounded-3xl border border-stone-200 p-6 shadow-sm h-fit text-left flex flex-col justify-between">
           <div>
             <h3 className="text-base font-bold text-stone-800 tracking-tight border-b border-stone-100 pb-3">Resumen de pedido</h3>
 
+            {/* 🚚 MODIFICACIÓN EXTRA: Formulario de Cotización de Envío */}
+            <form onSubmit={handleCalculateShipping} className="mt-4 pb-4 border-b border-stone-100">
+              <label className="text-[10px] uppercase font-bold tracking-wider text-stone-400 block mb-1.5">
+                Calcular costo de envío
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  maxLength="4"
+                  placeholder="Tu Código Postal (Ej: 7400)"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, ''))} // Bloquea letras
+                  className="bg-stone-50 border border-stone-200 text-sm rounded-xl px-3 h-10 w-full focus:outline-none focus:border-stone-400 transition-colors"
+                />
+                <button
+                  type="submit"
+                  disabled={isCalculating || postalCode.length !== 4} // ✨ Deshabilitado si no tiene 4 caracteres
+                  className="bg-stone-900 hover:bg-stone-800 text-white text-xs font-medium px-4 h-10 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap"
+                >
+                  {isCalculating ? 'Calculando...' : 'Calcular'}
+                </button>
+              </div>
+
+              {/* 🎉 Avisos Dinámicos de Beneficio de Envío Gratis */}
+              {!isFreeShipping && (
+                <p className="text-[11px] text-stone-500 mt-2 leading-snug">
+                  Te faltan <span className="font-semibold text-stone-700">${(freeShippingThreshold - subtotal).toLocaleString('es-AR')}</span> para conseguir <strong>Envío Gratis</strong>.
+                </p>
+              )}
+              {isFreeShipping && (
+                <p className="text-[11px] text-emerald-600 font-medium mt-2 flex items-center gap-1">
+                  🔥 ¡Envío gratis aplicado por superar los ${freeShippingThreshold.toLocaleString('es-AR')}!
+                </p>
+              )}
+            </form>
+
+            {/* Desglose Dinámico de Precios */}
             <div className="mt-4 space-y-2 border-b border-stone-100 pb-4">
               <div className="flex justify-between text-sm text-stone-500">
                 <span>Subtotal ({totalQuantity()} productos)</span>
-                <span>${totalPrice().toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
+                <span>${subtotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
               </div>
-              <div className="flex justify-between text-sm text-stone-500">
+              <div className="flex justify-between text-sm items-center text-stone-500">
                 <span>Envío</span>
-                <span className="text-emerald-600 font-medium">Gratis</span>
+                {/* ✨ Cambiado: Muestra Gratis si pasa los $50k o si es de Olavarría (costo 0) */}
+                {isFreeShipping || shippingCost === 0 ? (
+                  <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Gratis</span>
+                ) : shippingCost !== null ? (
+                  <span className="font-medium text-stone-800">${shippingCost.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
+                ) : (
+                  <span className="text-xs text-stone-400 italic">Ingresá tu CP</span>
+                )}
               </div>
             </div>
 
+            {/* Total Final Ajustado */}
             <div className="mt-4 flex justify-between items-baseline">
               <span className="text-base font-bold text-stone-800">Total</span>
               <div className="text-right">
                 <span className="text-2xl font-black text-stone-900 block">
-                  ${totalPrice().toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                  ${total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                 </span>
-                <span className="text-[10px] font-bold text-stone-400 block tracking-widest uppercase mt-0.5">O 3 cuotas sin interés de ${(totalPrice() / 3).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <span className="text-[10px] font-bold text-stone-400 block tracking-widest uppercase mt-0.5">
+                  O 3 cuotas sin interés de ${(total / 3).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* 🛠️ Botón interactivo conectado al handleCheckoutClick con Spinner integrado */}
+          {/* Botón interactivo con Spinner */}
           <button
             onClick={handleCheckoutClick}
             disabled={isNavigating}

@@ -10,11 +10,12 @@ const ItemDetail = ({ product }) => {
   // 🧴 1. Estado para controlar el tamaño de mililitros seleccionado
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || 300);
 
-  // 🚚 2. Estados para el simulador de Andreani
+  // 🚚 2. Estados para el simulador de Andreani (Sincronizado)
   const [zipCode, setZipCode] = useState('');
   const [shippingCost, setShippingCost] = useState(null);
+  const [isCalculating, setIsCalculating] = useState(false); 
 
-  // 📸 NUEVO: Estado para controlar el índice de la imagen activa en el carrusel
+  // 📸 Estado para controlar el índice de la imagen activa en el carrusel
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
 
   const { addItem } = useContext(CartContext);
@@ -24,30 +25,35 @@ const ItemDetail = ({ product }) => {
     ? Math.round(((product.price - product.priceTransfer) / product.price) * 100)
     : 0;
 
-  // 📸 NUEVO: Normalizamos las imágenes. Si existe el array 'images' lo usa; si no, mete la 'image' única en un array.
+  // 📸 Normalizamos las imágenes. Si existe el array 'images' lo usa; si no, mete la 'image' única en un array.
   const imagesList = product.images || (product.image ? [product.image] : []);
 
-  // 🚚 Handler para simular el costo de envío de Andreani
+  // 🚚 Handler unificado para simular el costo de envío de Andreani
   const handleCalculateShipping = (e) => {
     e.preventDefault();
-    const cp = Number(zipCode);
-    if (!zipCode) return;
+    
+    // 🔍 Validamos que tenga exactamente 4 dígitos antes de correr la simulación
+    if (zipCode.length !== 4) return;
 
-    if (cp >= 7400 && cp <= 7403) {
-      setShippingCost(0); // Local / Retiro
-    } else if (cp >= 1000 && cp <= 1999) {
-      setShippingCost(4500); // CABA y GBA
-    } else {
-      setShippingCost(6500); // Resto del país
-    }
+    setIsCalculating(true);
+
+    // Simulamos la misma deley de API de correo (800ms) que el carrito
+    setTimeout(() => {
+      if (zipCode === '7400') {
+        setShippingCost(0); // ✨ Olavarría: ¡Entrega local GRATIS!
+      } else if (zipCode.startsWith('7')) {
+        setShippingCost(3500); // Resto de Provincia de BSAS
+      } else {
+        setShippingCost(5800); // Resto del país
+      }
+      setIsCalculating(false);
+    }, 800);
   };
 
   // 🛒 Lógica de agregado con validación de stock inyectada
   const handleAddToCart = () => {
-    // Capturamos el código de respuesta que viene de la validación del CartContext
     const result = addItem({ ...product, selectedSize }, quantity);
 
-    // 🔴 ALERTA 1: Ya se alcanzó el límite de stock en el carrito
     if (result === 'LIMIT_REACHED') {
       Swal.fire({
         title: 'Stock máximo alcanzado',
@@ -64,7 +70,6 @@ const ItemDetail = ({ product }) => {
       return;
     }
 
-    // 🟡 ALERTA 2: Se sumaron unidades pero se clavó en el tope máximo de stock
     if (result === 'CAPPED') {
       Swal.fire({
         title: 'Cantidad ajustada',
@@ -81,7 +86,6 @@ const ItemDetail = ({ product }) => {
       return;
     }
 
-    // 🟢 ALERTA 3: Éxito (Se pudo agregar la cantidad solicitada normalmente)
     Swal.fire({
       title: '¡Agregado al carrito!',
       html: `Sumaste <strong>${quantity} u.</strong> de <strong>${product.name} (${selectedSize}ml)</strong> a tu bolsa.`,
@@ -96,7 +100,6 @@ const ItemDetail = ({ product }) => {
     });
   };
 
-  // Funciones para navegar por las fotos
   const nextImage = () => {
     setCurrentImgIndex((prev) => (prev === imagesList.length - 1 ? 0 : prev + 1));
   };
@@ -108,16 +111,14 @@ const ItemDetail = ({ product }) => {
   return (
     <div className="bg-white rounded-3xl border border-stone-200 p-6 md:p-8 shadow-sm max-w-4xl mx-auto">
 
-      {/* 📊 GRILLA SUPERIOR: Contiene la imagen/carrusel y la zona de conversión rápida */}
+      {/* 📊 GRILLA SUPERIOR */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
 
-        {/* 📸 COLUMNA IZQUIERDA: Módulo de Carrusel Premium con Efecto Slide */}
+        {/* 📸 COLUMNA IZQUIERDA: Carrusel */}
         <div className="w-full flex flex-col gap-3">
-          {/* Contenedor padre con overflow-hidden para tapar las fotos que quedan "afuera" */}
           <div className="bg-stone-50 rounded-2xl overflow-hidden aspect-square relative border border-stone-100 group w-full">
             
             {imagesList.length > 0 ? (
-              /* 🌟 ESTA ES LA MAGIA: Una pista flex que contiene todas las fotos alineadas de corrido */
               <div 
                 className="flex w-full h-full transition-transform duration-500 ease-out"
                 style={{ transform: `translateX(-${currentImgIndex * 100}%)` }}
@@ -127,7 +128,6 @@ const ItemDetail = ({ product }) => {
                     key={index}
                     src={img}
                     alt={`${product.name} - Vista ${index + 1}`}
-                    /* flex-shrink-0 es clave para que cada foto ocupe el 100% exacto de la caja sin aplastarse */
                     className="w-full h-full object-cover flex-shrink-0"
                   />
                 ))}
@@ -138,12 +138,10 @@ const ItemDetail = ({ product }) => {
               </div>
             )}
 
-            {/* Etiqueta de la línea */}
             <span className="absolute top-4 left-4 z-10 text-[10px] font-bold tracking-wider text-stone-700 uppercase bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full border border-stone-100 shadow-sm">
               {product.line}
             </span>
 
-            {/* Flechas de navegación con z-10 para quedar siempre al frente */}
             {imagesList.length > 1 && (
               <>
                 <button
@@ -168,7 +166,6 @@ const ItemDetail = ({ product }) => {
             )}
           </div>
 
-          {/* Miniaturas inferiores (Thumbnails) */}
           {imagesList.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-1 justify-start">
               {imagesList.map((img, index) => (
@@ -186,7 +183,7 @@ const ItemDetail = ({ product }) => {
           )}
         </div>
 
-        {/* COLUMNA DERECHA: Detalles de Compra Rápidos */}
+        {/* COLUMNA DERECHA: Detalles de Compra */}
         <div className="flex flex-col gap-5 text-left h-full justify-between w-full">
           <div>
             <span className="text-xs font-bold tracking-widest text-stone-400 uppercase">
@@ -201,7 +198,6 @@ const ItemDetail = ({ product }) => {
                 ${product.price.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
               </span>
 
-              {/* Bloque dinámico de cuotas y descuento por transferencia */}
               <div className="mt-1 bg-stone-50 border border-stone-100 p-3 rounded-xl max-w-sm">
                 <span className="block text-[10px] font-bold tracking-widest text-stone-500 uppercase">
                   💳 Hasta 3 cuotas sin interés
@@ -265,37 +261,47 @@ const ItemDetail = ({ product }) => {
 
           {/* 🚚 Módulo Andreani Integrado */}
           <div className="border-t border-stone-100 pt-4 flex flex-col gap-3">
-            <div className="flex items-center gap-2 text-stone-500 bg-stone-50/60 border border-stone-100 rounded-xl p-3 text-xs">
+            <div className="flex items-center gap-2 text-stone-500 bg-stone-50/60 border border-stone-100 rounded-xl p-3 text-xs text-left">
               <span className="text-base">📦</span>
               <span>Envíos a todo el país a través de <strong>Andreani</strong></span>
             </div>
 
-            <form onSubmit={handleCalculateShipping} className="flex flex-col gap-1.5">
+            <form onSubmit={handleCalculateShipping} className="flex flex-col gap-1.5 text-left">
               <label className="text-[10px] uppercase font-bold tracking-wider text-stone-400">
                 Calculá el costo de envío
               </label>
               <div className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="Tu código postal"
+                  maxLength="4"
+                  placeholder="Tu código postal (Ej: 7400)"
                   value={zipCode}
-                  onChange={(e) => setZipCode(e.target.value)}
+                  onChange={(e) => setZipCode(e.target.value.replace(/\D/g, ''))} // Bloquea letras en vivo
                   className="bg-stone-50 border border-stone-200 text-sm rounded-xl px-4 h-11 flex-1 focus:outline-none focus:border-stone-400 transition-colors"
                 />
                 <button
                   type="submit"
-                  className="bg-white border border-stone-300 hover:border-stone-800 text-stone-800 font-medium px-5 h-11 rounded-xl text-xs uppercase tracking-wider transition-all active:scale-[0.97]"
+                  disabled={isCalculating || zipCode.length !== 4} // ✨ Ahora sí frena códigos inválidos o incompletos
+                  className="bg-stone-900 hover:bg-stone-800 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium px-5 h-11 rounded-xl text-xs uppercase tracking-wider transition-all active:scale-[0.97] cursor-pointer whitespace-nowrap"
                 >
-                  Calcular
+                  {isCalculating ? 'Calculando...' : 'Calcular'}
                 </button>
               </div>
             </form>
 
-            {shippingCost !== null && (
-              <div className="text-xs font-semibold text-stone-700 bg-stone-50 border border-stone-100 p-2.5 rounded-xl animate-fade-in">
-                {shippingCost === 0
-                  ? "🎉 ¡Retiro en Olavarría o envío local gratis disponible!"
-                  : `El costo de envío es de $${shippingCost.toLocaleString("es-AR", { minimumFractionDigits: 2 })}`}
+            {/* Resultado dinámico con diseño premium */}
+            {shippingCost !== null && !isCalculating && (
+              <div className="mt-1 p-3 bg-stone-50 border border-stone-100 rounded-xl flex justify-between items-center text-xs font-semibold text-stone-700 text-left animate-fadeIn">
+                <span>Costo de envío:</span>
+                {shippingCost === 0 ? (
+                  <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
+                    ¡Entrega local o retiro GRATIS!
+                  </span>
+                ) : (
+                  <span className="font-bold text-stone-800">
+                    ${shippingCost.toLocaleString("es-AR", { minimumFractionDigits: 2 })}
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -303,9 +309,8 @@ const ItemDetail = ({ product }) => {
         </div>
       </div>
 
-      {/* 📝 SECCIÓN INFERIOR: Texto extendido a ancho completo */}
+      {/* 📝 SECCIÓN INFERIOR */}
       <div className="mt-12 pt-10 border-t border-stone-100 grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-
         <div className="md:col-span-2">
           <h3 className="text-sm font-bold uppercase tracking-wider text-stone-800 mb-4">
             Descripción Detallada
@@ -338,7 +343,6 @@ const ItemDetail = ({ product }) => {
             </li>
           </ul>
         </div>
-
       </div>
 
     </div>
